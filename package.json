@@ -1,5 +1,5 @@
 {
-  "name": "freetype2",
+  "name": "freetype2_render",
   "version": "0.1.2",
   "description": "Parse font files with FreeType.",
   "main": "build/Release/freetype2",

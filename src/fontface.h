@@ -10,9 +10,7 @@ using namespace v8;
 
 class FontFace : public node::ObjectWrap {
   public:
-    static void Init();
-    static Handle<Value> NewInstance(_NAN_METHOD_ARGS_TYPE args);
-
+    static void Init(Handle<Object> target);
     FT_Face face;
 
   private:
@@ -20,7 +18,10 @@ class FontFace : public node::ObjectWrap {
     ~FontFace();
 
     static NAN_METHOD(New);
-    static Persistent<Function> constructor;
+    static NAN_METHOD(Render);
+    static NAN_METHOD(Kerning);
+    static NAN_METHOD(hasKerning);
+    static Persistent<FunctionTemplate> constructor;
 
     static FT_Library library;
     void SetObjectProperties(Handle<Object> obj);
