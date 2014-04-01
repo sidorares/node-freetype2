@@ -113,14 +113,24 @@ NAN_METHOD(FontFace::hasKerning) {
 NAN_METHOD(FontFace::Kerning) {
   NanScope();
 
+  FT_Error error;
+
   FT_UInt left = (FT_UInt) args[0]->NumberValue();
   FT_UInt right = (FT_UInt) args[1]->NumberValue();
 
-  FT_Vector  delta;
+  FT_Int char_width  = args[1]->NumberValue();
+  FT_Int char_height = args[2]->NumberValue();
+  FT_Int xdpi   = args[3]->NumberValue();
+  FT_Int ydpi   = args[4]->NumberValue();
 
   FontFace *ff = ObjectWrap::Unwrap<FontFace>(args.This());
-  FT_Error error = FT_Get_Kerning( ff->face, FT_Get_Char_Index(ff->face, left), FT_Get_Char_Index(ff->face, right),
-    FT_KERNING_DEFAULT, &delta );
+  error = FT_Set_Char_Size( ff->face, char_width, char_height, xdpi, ydpi );
+
+  FT_Vector  delta;
+
+  FT_Select_Charmap(ff->face, FT_ENCODING_UNICODE);
+  error = FT_Get_Kerning( ff->face, FT_Get_Char_Index(ff->face, left), FT_Get_Char_Index(ff->face, right),
+    FT_KERNING_UNFITTED, &delta );
 
   Local<Object> res = Object::New();
   res->Set(NanSymbol("x"), Integer::New(delta.x));
@@ -139,8 +149,10 @@ NAN_METHOD(FontFace::Render) {
   FontFace *ff = ObjectWrap::Unwrap<FontFace>(args.This());
 
   FT_UInt index;
+  FT_UInt charcode = (FT_UInt) args[0]->NumberValue();
   if (args[0]->IsNumber())
-   index = (FT_UInt) args[0]->NumberValue();
+   //index = FT_Get_Char_Index(ff->face, charcode);
+   index = charcode;
   // else if (args[0]->IsString())
   //   String::Utf8Value str(args[0]->ToString());
 
@@ -158,7 +170,8 @@ NAN_METHOD(FontFace::Render) {
   height = slot->bitmap.rows;
 
   Local<Object> obj = Object::New();
-  obj->Set(NanSymbol("id"), Integer::New(index));
+  obj->Set(NanSymbol("id"), Integer::New(charcode));
+  obj->Set(NanSymbol("index"), Integer::New(index));
   obj->Set(NanSymbol("width"), Integer::New(width));
   obj->Set(NanSymbol("height"), Integer::New(height));
   obj->Set(NanSymbol("x"), Integer::New(slot->bitmap_left));
