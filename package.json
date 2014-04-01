@@ -1,6 +1,6 @@
 {
   "name": "freetype2_render",
-  "version": "0.1.3",
+  "version": "1.3.9",
   "description": "Parse font files with FreeType.",
   "main": "./index.js",
   "scripts": {
