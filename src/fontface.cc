@@ -16,21 +16,22 @@ FontFace::~FontFace() {
 FT_Library FontFace::library;
 
 void FontFace::Init(Handle<Object> target) {
+  NanScope();
+
   if (FT_Init_FreeType(&library)) exit(EXIT_FAILURE);
 
-  Local<FunctionTemplate> ctor = FunctionTemplate::New(New);
-  NanAssignPersistent(FunctionTemplate, constructor, ctor);
+  Local<FunctionTemplate> ctor = NanNew<FunctionTemplate>(New);
   ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(NanSymbol("FontFace"));
+  ctor->SetClassName(NanNew("FontFace"));
 
   NODE_SET_PROTOTYPE_METHOD(ctor, "render", Render);
   NODE_SET_PROTOTYPE_METHOD(ctor, "kerning", Kerning);
   NODE_SET_PROTOTYPE_METHOD(ctor, "hasKerning", hasKerning);
 
-  // target->Set(NanSymbol("Canvas"), ctor->GetFunction());
-  // proto->SetAccessor(NanSymbol("xxxx"), GetXxxx);
+  // target->Set(NanNew("Canvas"), ctor->GetFunction());
+  // proto->SetAccessor(NanNew("xxxx"), GetXxxx);
 
-  target->Set(NanSymbol("FontFace"), ctor->GetFunction());
+  target->Set(NanNew("FontFace"), ctor->GetFunction());
 }
 
 NAN_METHOD(FontFace::New) {
@@ -49,45 +50,45 @@ NAN_METHOD(FontFace::New) {
 
 // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
 void FontFace::SetObjectProperties(Handle<Object> obj) {
-  obj->Set(NanSymbol("num_faces"), Integer::New(this->face->num_faces));
-  obj->Set(NanSymbol("face_index"), Integer::New(this->face->face_index));
+  obj->Set(NanNew("num_faces"), NanNew<Number>(this->face->num_faces));
+  obj->Set(NanNew("face_index"), NanNew<Number>(this->face->face_index));
 
-  obj->Set(NanSymbol("face_flags"), Integer::New(this->face->face_flags));
-  obj->Set(NanSymbol("style_flags"), Integer::New(this->face->style_flags));
+  obj->Set(NanNew("face_flags"), NanNew<Number>(this->face->face_flags));
+  obj->Set(NanNew("style_flags"), NanNew<Number>(this->face->style_flags));
 
-  obj->Set(NanSymbol("num_glyphs"), Integer::New(this->face->num_glyphs));
+  obj->Set(NanNew("num_glyphs"), NanNew<Number>(this->face->num_glyphs));
 
-  obj->Set(NanSymbol("family_name"), String::New(this->face->family_name));
-  obj->Set(NanSymbol("style_name"), String::New(this->face->style_name));
+  obj->Set(NanNew("family_name"), NanNew(this->face->family_name));
+  obj->Set(NanNew("style_name"), NanNew(this->face->style_name));
 
-  obj->Set(NanSymbol("num_fixed_sizes"), Integer::New(this->face->num_fixed_sizes));
-  // obj->Set(NanSymbol("available_sizes"), Integer::New(this->face->available_sizes));
+  obj->Set(NanNew("num_fixed_sizes"), NanNew<Number>(this->face->num_fixed_sizes));
+  // obj->Set(NanNew("available_sizes"), NanNew(this->face->available_sizes));
 
-  obj->Set(NanSymbol("num_charmaps"), Integer::New(this->face->num_charmaps));
-  // obj->Set(NanSymbol("charmaps"), Integer::New(this->face->charmaps));
+  obj->Set(NanNew("num_charmaps"), NanNew<Number>(this->face->num_charmaps));
+  // obj->Set(NanNew("charmaps"), NanNew(this->face->charmaps));
 
-  // obj->Set(NanSymbol("generic"), Integer::New(this->face->generic));
+  // obj->Set(NanNew("generic"), NanNew(this->face->generic));
 
 
-  obj->Set(NanSymbol("units_per_EM"), Integer::New(this->face->units_per_EM));
-  // obj->Set(NanSymbol("bbox"), Integer::New(this->face->bbox));
+  obj->Set(NanNew("units_per_EM"), NanNew<Number>(this->face->units_per_EM));
+  // obj->Set(NanNew("bbox"), NanNew(this->face->bbox));
 
-  obj->Set(NanSymbol("ascender"), Integer::New(this->face->ascender));
-  obj->Set(NanSymbol("descender"), Integer::New(this->face->descender));
-  obj->Set(NanSymbol("height"), Integer::New(this->face->height));
+  obj->Set(NanNew("ascender"), NanNew<Number>(this->face->ascender));
+  obj->Set(NanNew("descender"), NanNew<Number>(this->face->descender));
+  obj->Set(NanNew("height"), NanNew<Number>(this->face->height));
 
-  obj->Set(NanSymbol("max_advance_width"), Integer::New(this->face->max_advance_width));
-  obj->Set(NanSymbol("max_advance_height"), Integer::New(this->face->max_advance_height));
+  obj->Set(NanNew("max_advance_width"), NanNew<Number>(this->face->max_advance_width));
+  obj->Set(NanNew("max_advance_height"), NanNew<Number>(this->face->max_advance_height));
 
-  obj->Set(NanSymbol("underline_position"), Integer::New(this->face->underline_position));
-  obj->Set(NanSymbol("underline_thickness"), Integer::New(this->face->underline_thickness));
+  obj->Set(NanNew("underline_position"), NanNew<Number>(this->face->underline_position));
+  obj->Set(NanNew("underline_thickness"), NanNew<Number>(this->face->underline_thickness));
 
   std::vector<FT_UInt> acv = this->AvailableCharacters();
-  Local<Array> aca = Array::New(acv.size());
+  Local<Array> aca = NanNew<Array>(acv.size());
   for (size_t i = 0; i < acv.size(); i++) {
-    aca->Set(i, Integer::New(acv.at(i)));
+    aca->Set(i, NanNew(acv.at(i)));
   }
-  obj->Set(NanSymbol("available_characters"), aca);
+  obj->Set(NanNew("available_characters"), aca);
 }
 
 std::vector<FT_UInt> FontFace::AvailableCharacters() {
@@ -107,7 +108,7 @@ std::vector<FT_UInt> FontFace::AvailableCharacters() {
 NAN_METHOD(FontFace::hasKerning) {
   NanScope();
   FontFace *ff = ObjectWrap::Unwrap<FontFace>(args.This());
-  NanReturnValue(Boolean::New(FT_HAS_KERNING(ff->face)));
+  NanReturnValue(NanNew<Boolean>(FT_HAS_KERNING(ff->face)));
 }
 
 NAN_METHOD(FontFace::Kerning) {
@@ -132,9 +133,9 @@ NAN_METHOD(FontFace::Kerning) {
   error = FT_Get_Kerning( ff->face, FT_Get_Char_Index(ff->face, left), FT_Get_Char_Index(ff->face, right),
     FT_KERNING_UNFITTED, &delta );
 
-  Local<Object> res = Object::New();
-  res->Set(NanSymbol("x"), Integer::New(delta.x));
-  res->Set(NanSymbol("y"), Integer::New(delta.y));
+  Local<Object> res = NanNew<Object>();
+  res->Set(NanNew("x"), NanNew<Number>(delta.x));
+  res->Set(NanNew("y"), NanNew<Number>(delta.y));
   NanReturnValue(res);
 }
 
@@ -148,9 +149,9 @@ NAN_METHOD(FontFace::Render) {
 
   FontFace *ff = ObjectWrap::Unwrap<FontFace>(args.This());
 
-  FT_UInt index;
+  FT_UInt index = 0;
   FT_UInt charcode = (FT_UInt) args[0]->NumberValue();
-  if (args[0]->IsNumber())
+  //if (args[0]->IsNumber())
    //index = FT_Get_Char_Index(ff->face, charcode);
    index = charcode;
   // else if (args[0]->IsString())
@@ -169,16 +170,16 @@ NAN_METHOD(FontFace::Render) {
   width = slot->bitmap.width;
   height = slot->bitmap.rows;
 
-  Local<Object> obj = Object::New();
-  obj->Set(NanSymbol("id"), Integer::New(charcode));
-  obj->Set(NanSymbol("index"), Integer::New(index));
-  obj->Set(NanSymbol("width"), Integer::New(width));
-  obj->Set(NanSymbol("height"), Integer::New(height));
-  obj->Set(NanSymbol("x"), Integer::New(slot->bitmap_left));
-  obj->Set(NanSymbol("y"), Integer::New(slot->bitmap_top));
-  obj->Set(NanSymbol("offX"), Integer::New(slot->advance.x));
-  obj->Set(NanSymbol("offY"), Integer::New(slot->advance.y));
-  obj->Set(NanSymbol("image"), NanNewBufferHandle((char*)slot->bitmap.buffer, width*height));
+  Local<Object> obj = NanNew<Object>();
+  obj->Set(NanNew("id"), NanNew<Number>(charcode));
+  obj->Set(NanNew("index"), NanNew<Number>(index));
+  obj->Set(NanNew("width"), NanNew<Number>(width));
+  obj->Set(NanNew("height"), NanNew<Number>(height));
+  obj->Set(NanNew("x"), NanNew<Number>(slot->bitmap_left));
+  obj->Set(NanNew("y"), NanNew<Number>(slot->bitmap_top));
+  obj->Set(NanNew("offX"), NanNew<Number>(slot->advance.x));
+  obj->Set(NanNew("offY"), NanNew<Number>(slot->advance.y));
+  obj->Set(NanNew("image"), NanNewBufferHandle((char*)slot->bitmap.buffer, width*height));
 
   NanReturnValue(obj);
 
