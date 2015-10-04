@@ -66,7 +66,6 @@ FontFace::~FontFace() {
 
 NAN_GETTER(FontFace::acc_handle) {
   FontFace* fontFace = node::ObjectWrap::Unwrap<FontFace>(info.This());
-  //info.GetReturnValue().Set(Nan::New((int64_t)fontFace->ftFace));
   const void * address = static_cast<const void*>(fontFace->ftFace);
   std::stringstream ss;
   ss << address;
