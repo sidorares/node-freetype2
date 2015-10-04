@@ -9,6 +9,7 @@ v8::Local<v8::FunctionTemplate> FontFace::CreateConstructorTemplate() {
   constructorTemplate->SetClassName(Nan::New("FontFace").ToLocalChecked());
 
   v8::Local<v8::ObjectTemplate> instanceTemplate = constructorTemplate->InstanceTemplate();
+  Nan::SetAccessor(instanceTemplate, Nan::New("handle").ToLocalChecked(), acc_handle);
   Nan::SetAccessor(instanceTemplate, Nan::New("num_faces").ToLocalChecked(), acc_num_faces);
   Nan::SetAccessor(instanceTemplate, Nan::New("face_index").ToLocalChecked(), acc_face_index);
   Nan::SetAccessor(instanceTemplate, Nan::New("face_flags").ToLocalChecked(), acc_face_flags);
@@ -58,6 +59,19 @@ FontFace::FontFace() {}
 
 FontFace::~FontFace() {
   FT_Done_Face(this->ftFace);
+}
+
+#include <sstream>
+#include <string>
+
+NAN_GETTER(FontFace::acc_handle) {
+  FontFace* fontFace = node::ObjectWrap::Unwrap<FontFace>(info.This());
+  //info.GetReturnValue().Set(Nan::New((int64_t)fontFace->ftFace));
+  const void * address = static_cast<const void*>(fontFace->ftFace);
+  std::stringstream ss;
+  ss << address;
+  std::string addressHex = ss.str();
+  info.GetReturnValue().Set(Nan::New<v8::String>(addressHex).ToLocalChecked());
 }
 
 NAN_GETTER(FontFace::acc_num_faces) {

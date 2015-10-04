@@ -19,6 +19,7 @@ class FontFace : public node::ObjectWrap {
     static v8::Local<v8::FunctionTemplate> CreateConstructorTemplate();
     static Nan::Persistent<v8::Function> constructor;
 
+    static NAN_GETTER(acc_handle);
     static NAN_GETTER(acc_num_faces);
     static NAN_GETTER(acc_face_index);
     static NAN_GETTER(acc_face_flags);
